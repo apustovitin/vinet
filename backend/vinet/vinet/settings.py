@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -88,6 +89,21 @@ DATABASES = {
     }
 }
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.RemoteUserBackend',
+]
+
+JWT_AUTH = {
+    'JWT_PAYLOAD_GET_USERNAME_HANDLER':
+        os.environ.get("JWT_PAYLOAD_GET_USERNAME_HANDLER"),
+    'JWT_DECODE_HANDLER':
+        os.environ.get("JWT_DECODE_HANDLER"),
+    'JWT_ALGORITHM': os.environ.get("JWT_ALGORITHM"),
+    'JWT_AUDIENCE': os.environ.get("JWT_AUDIENCE"),
+    'JWT_ISSUER': os.environ.get("JWT_ISSUER"),
+    'JWT_AUTH_HEADER_PREFIX': os.environ.get("JWT_AUTH_HEADER_PREFIX"),
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -134,7 +150,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-   'PAGE_SIZE': 10
+   'PAGE_SIZE': 10,
+   'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
